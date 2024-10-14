@@ -3,50 +3,59 @@ import RPi.GPIO as GPIO  # GPIO control for Raspberry Pi
 import time  # Time module for delays
 
 # GPIO setup for controlling the LED
-GPIO.setmode(GPIO.BCM)  # Using BCM pin numbering
-GPIO.setwarnings(False)  # Disabling warnings
-GPIO.setup(27, GPIO.OUT)  # Setting GPIO 27 as output
+GPIO.setmode(GPIO.BCM)  # Use Broadcom pin-numbering scheme for Raspberry Pi GPIO
+GPIO.setwarnings(False)  # Disable GPIO warnings
+GPIO.setup(27, GPIO.OUT)  # Set GPIO pin 27 as output for controlling the LED
 
 def turn_on_light():
-    GPIO.output(27, GPIO.HIGH)  # Turn LED on
-    print("Light turned ON")
+    # Function to turn on the LED connected to GPIO pin 27
+    GPIO.output(27, GPIO.HIGH)  # Set GPIO 27 output to HIGH, turning the LED on
+    print("Light turned ON")  # Print message for confirmation
 
 def turn_off_light():
-    GPIO.output(27, GPIO.LOW)  # Turn LED off
-    print("Light turned OFF")
+    # Function to turn off the LED connected to GPIO pin 27
+    GPIO.output(27, GPIO.LOW)  # Set GPIO 27 output to LOW, turning the LED off
+    print("Light turned OFF")  # Print message for confirmation
 
-# Initialize the recognizer for speech commands
-recognizer = sr.Recognizer()
+# Initialize the recognizer to handle speech commands
+recognizer = sr.Recognizer()  # Create an instance of the speech recognizer
 
 def listen_for_command():
-    with sr.Microphone() as source:  # Using the microphone as input
-        print("Listening for command...")
-        recognizer.adjust_for_ambient_noise(source)  # Adjust for ambient noise
-        audio = recognizer.listen(source)  # Capture audio
+    # Function to listen for voice commands using the microphone
+    with sr.Microphone() as source:  # Use the system microphone as the input source
+        print("Listening for command...")  # Indicate that the system is listening
+        recognizer.adjust_for_ambient_noise(source)  # Adjust for background noise
+        audio = recognizer.listen(source)  # Record the audio input
 
     try:
-        command = recognizer.recognize_google(audio).lower()  # Convert audio to text
-        print(f"Command received: {command}")
-        return command
+        # Attempt to recognize the command using Google Speech Recognition
+        command = recognizer.recognize_google(audio).lower()  # Convert audio to lowercase text
+        print(f"Command received: {command}")  # Print recognized command
+        return command  # Return the recognized command
     except sr.UnknownValueError:
-        print("Could not understand the audio")
+        # Handle the case where the speech could not be understood
+        print("Could not understand the audio")  # Print error message
     except sr.RequestError:
-        print("API request error")
-    return None
+        # Handle any issues with the API request
+        print("API request error")  # Print error message
+    return None  # Return None if the command wasn't recognized
 
 def main():
+    # Main loop to continuously listen for commands and control the LED
     while True:
-        command = listen_for_command()
+        command = listen_for_command()  # Get the command from the user
         if command:
+            # Check if the command is to turn the light on or off
             if "turn on" in command:
-                turn_on_light()
+                turn_on_light()  # Call the function to turn on the LED
             elif "turn off" in command:
-                turn_off_light()
-        time.sleep(1)
+                turn_off_light()  # Call the function to turn off the LED
+        time.sleep(1)  # Pause for a second before listening for the next command
 
 if __name__ == "__main__":
+    # Run the program and handle any cleanup on exit
     try:
-        main()
+        main()  # Start the main loop
     except KeyboardInterrupt:
-        GPIO.cleanup()  # Clean up GPIO on exit
-        print("Program stopped.")
+        GPIO.cleanup()  # Reset the GPIO pins when the program is interrupted
+        print("Program stopped.")  # Print message confirming the program has stopped
